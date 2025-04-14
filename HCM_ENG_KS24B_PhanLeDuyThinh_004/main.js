@@ -3,10 +3,9 @@ let acount = [
     { nameProjetc: "lập trình AI", dob: "2026-11-30", nameLeder: "Nguyễn Quốc Tuấn", status: 2 },
     { nameProjetc: "Game", dob: "2026-11-09", nameLeder: "Mai Nhật Tân", status: 1 }
 ];
-
 let statusName = ["Đang làm", "Hoàn Thành", "Trễ Hạn"];
-let editingIndex = -1; // -1 nghĩa là đang thêm mới
-
+// Biến lưu vị trí đang sửa. Nếu = -1 tức là đang thêm mới
+let editingIndex = -1;
 const getStatusByIndex = (index) => {
     return statusName[index - 1] || "Không xác định";
 };
@@ -46,41 +45,79 @@ function editProject(index) {
     document.getElementById("hanChot").value = project.dob;
     document.getElementById("nguoiPhuTrach").value = project.nameLeder;
     document.getElementById("trangThai").value = project.status;
-    editingIndex = index;
+    editingIndex = index; // ghi lại vị trí đang sửa
 }
 document.querySelector("form").addEventListener("submit", function (e) {
-    e.preventDefault(); // chặn reload
+    e.preventDefault(); // chặn reload trang
+    const nameInput = document.getElementById("tenCongViec");
+    const dobInput = document.getElementById("hanChot");
+    const leaderInput = document.getElementById("nguoiPhuTrach");
+    const statusInput = document.getElementById("trangThai");
+    const name = nameInput.value.trim();
+    const dob = dobInput.value;
+    const leader = leaderInput.value.trim();
+    const status = parseInt(statusInput.value);
 
-    const name = document.getElementById("tenCongViec").value.trim();
-    const dob = document.getElementById("hanChot").value;
-    const leader = document.getElementById("nguoiPhuTrach").value.trim();
-    const status = parseInt(document.getElementById("trangThai").value);
-
-    if (!name || !dob || !leader || isNaN(status)) {
-        alert("Vui lòng điền đầy đủ thông tin!");
-        return;
+    let isValid = true;
+    //kiểm ttra lỗi
+    if (!name) {
+        nameInput.classList.add("is-invalid");
+        isValid = false;
+    } else {
+        nameInput.classList.remove("is-invalid");
     }
 
+    if (!dob) {
+        dobInput.classList.add("is-invalid");
+        isValid = false;
+    } else {
+        dobInput.classList.remove("is-invalid");
+    }
+
+    if (!leader) {
+        leaderInput.classList.add("is-invalid");
+        isValid = false;
+    } else {
+        leaderInput.classList.remove("is-invalid");
+    }
+
+    if (isNaN(status)) {
+        statusInput.classList.add("is-invalid");
+        isValid = false;
+    } else {
+        statusInput.classList.remove("is-invalid");
+    }
+
+    if (!isValid) return;
+
+    // Tạo object mới
     const newProject = { nameProjetc: name, dob, nameLeder: leader, status };
+
     if (editingIndex === -1) {
         acount.push(newProject);
     } else {
         acount[editingIndex] = newProject;
         editingIndex = -1;
     }
+    // Reset form sau khi thêm/cập nhật
+    document.querySelector("form").reset();
+    [nameInput, dobInput, leaderInput, statusInput].forEach(input => {
+        input.classList.remove("is-invalid");
+    });
 
-    document.querySelector("form").reset();// để hàm tự reset ko cần phải xoá tay
     renderAcount();
-    
 });
 
-renderAcount();
 function handleSearch(event) {
     if (event.key === "Enter") {
-        event.preventDefault(); // tránh reload trang
+        event.preventDefault();
         const keyword = document.getElementById("searchInput").value.toLowerCase();
         const result = acount.filter(project => project.nameProjetc.toLowerCase().includes(keyword));
         renderAcount(result);
     }
 }
+// Gán sự kiện tìm kiếm
 document.getElementById("searchInput").addEventListener("keydown", handleSearch);
+
+// Gọi lần đầu để hiển thị danh sách
+renderAcount();
